@@ -1,4 +1,5 @@
 
+from os import access
 from flask.wrappers import Request
 from sqlalchemy import delete, false, true
 from app.API import bp
@@ -15,7 +16,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec import marshal_with
 import secrets
 import jwt
-from flask_jwt_extended import create_access_token
+#from flask_jwt_extended import create_access_token
 from time import time
 from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema
 import json
@@ -68,7 +69,8 @@ class AuthApi(MethodResource,Resource):
         if user:
             if user.check_password(data['password']):
                 expires = timedelta(days=1)
-                access_token = create_access_token(identity=str(user.id), expires_delta=expires)
+                access_token = jwt.encode({"exp":datetime.now() + expires}, Config.SECRET_KEY)
+                #access_token = create_access_token(identity=str(user.id), expires_delta=expires)
                 
                 return ({
                     'isUser':'true',
