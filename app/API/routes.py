@@ -147,7 +147,21 @@ class JalonApi(MethodResource,Resource):
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
             data = request.get_json(force=True)
-                     
+            jalon = data['jalon']
+            charge_jalon = data['charge_jalon']
+            date = data['date']
+            if data['projet_id'] == '':
+                projet_id = None
+                contrat_id = data['contrat_id']
+            else:
+                projet_id = data['projet_id']
+                contrat_id = None
+            
+            commentaire = data['commentaire']
+            newJalon = Jalon(jalon=jalon, charge_jalon=charge_jalon, date=date, projet_id=projet_id, 
+            contrat_id=contrat_id, commentaire=commentaire)
+            session.add(newJalon)
+            session.commit()  
             return jalons_schema.dump(data)
         else:
             return ({'message':'token not valid or expired'}, 400) 
@@ -155,7 +169,7 @@ class JalonApi(MethodResource,Resource):
 api.add_resource(JalonApi, '/api/v1/jalon')
 
 class EditJalonApi(MethodResource,Resource):      
-    def post(self, jalon_id):
+    def put(self, jalon_id):
         "edit jalons"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
