@@ -34,7 +34,7 @@ msal==1.17.0
 packaging==21.3
 psycopg2-binary==2.9.3
 pycparser==2.21
-PyJWT==2.3.0
+pyjwt==2.3.0
 pyparsing==3.0.7
 PySocks==1.7.1
 python-dotenv==0.19.2
