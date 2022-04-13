@@ -4,7 +4,7 @@ from app.models import Contrat
 import psycopg2
 from flask import Flask
 from flask_cors import CORS
-
+#from flask_jwt_extended import JWTManager
 
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -18,6 +18,7 @@ app = Flask(__name__)
 
 app.config.from_object(Config)
 CORS(app)
+#jwt = JWTManager(app)
 admin = Admin(app, name='contratGref', template_mode='bootstrap4')
 admin.add_view(ModelView(Contrat, session))
 

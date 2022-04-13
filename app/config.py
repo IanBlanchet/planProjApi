@@ -14,6 +14,11 @@ class Config(object):
 	token = os.environ.get('token')
 	DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///pos.db'
 	FLASK_APP = os.environ.get('FLASK_APP')
+	client_id = os.environ.get('CLIENT_ID')
+	tenant = os.environ.get('TENANT')
+	secret = os.environ.get('CLIENT_SECRET')
+	office_pass = os.environ.get('OFFICE_PASS')
+	
 
 #connection with bd
 Base = declarative_base()
