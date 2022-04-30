@@ -1,4 +1,5 @@
 
+from builtins import print
 from os import access
 from flask.wrappers import Request
 from sqlalchemy import delete, false, true
@@ -21,6 +22,25 @@ from time import time
 from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema
 import json
 import msal
+
+#sript pour ajouter le charge de jalon
+jalons = session.query(Jalon).all()
+for jalon in jalons:
+    if jalon.charge_jalon:
+        print(jalon.id)
+    elif jalon.contrat_id:
+        contrat = session.query(Contrat).filter_by(id = jalon.contrat_id).first()        
+        if contrat.charge_contrat:
+            jalon.charge_jalon = contrat.charge_contrat
+            session.commit()
+        elif contrat.projet_id:
+            projet = session.query(Projet).filter_by(id = contrat.projet_id).first()
+            jalon.charge_jalon = projet.charge
+            session.commit()           
+    elif jalon.projet_id:
+        projet = session.query(Projet).filter_by(id = jalon.projet_id).first()
+        jalon.charge_jalon = projet.charge
+        session.commit()
 
 
 
