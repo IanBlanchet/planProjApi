@@ -1,4 +1,4 @@
-from app.models import Contrat, Projet, User, Jalon
+from app.models import Contrat, Projet, User, Jalon, Events
 from flask_marshmallow import Marshmallow
 from marshmallow import post_load, INCLUDE, EXCLUDE, fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
@@ -74,12 +74,27 @@ class JalonSchema(Schema):
     charge_jalon = fields.Integer()
     projet_id =  fields.Integer()
     contrat_id =  fields.Integer()
+    duree = fields.Integer()
 
 
     @post_load
     def make_jalon(self, data, **kwargs):
         return Jalon(**data)
 
-
+class EventSchema(Schema):
+    class meta:
+        model = Events
+        include_fk = True
+        unknown = EXCLUDE
+        load_instance = True
+        sqla_session = session
+        
+    id = fields.Integer()
+    title = fields.String()
+    date = fields.String()
+    
+    @post_load
+    def make_events(self, data, **kwargs):
+        return Events(**data)
         
 

@@ -188,6 +188,7 @@ class Jalon(Base):
         charge_jalon = Column(Integer, ForeignKey('user.id'))
         projet_id =  Column(Integer, ForeignKey('projet.id'))
         contrat_id =  Column(Integer, ForeignKey('contrat.id'))
+        duree = Column(Integer)
 	
 
 
@@ -224,6 +225,12 @@ class Decompte(Base):
         quantite = Column(Float)
         no_decompte = Column(Integer)
         bordereau_id =  Column(Integer, ForeignKey('bordereau.id'))
+
+class Events(Base):
+        __tablename__ = 'events'
+        id = Column(Integer, primary_key=True)
+        title = Column(String(25))
+        date = Column(Date)
 
 
 Base.metadata.create_all(engine)

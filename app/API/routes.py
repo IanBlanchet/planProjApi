@@ -3,7 +3,7 @@ from os import access
 from flask.wrappers import Request
 from sqlalchemy import delete, false, true
 from app.API import bp
-from app.models import Projet, Contrat, User, Jalon
+from app.models import Projet, Contrat, User, Jalon, Events
 from app import app
 from app.config import session, engine, Config
 from flask_restful import Resource, Api, abort
@@ -18,7 +18,7 @@ import secrets
 import jwt
 #from flask_jwt_extended import create_access_token
 from time import time
-from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema
+from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema, EventSchema
 import json
 import msal
 
@@ -49,6 +49,7 @@ contrats_schema = ContratSchema(many=True)
 users_schema = UserSchema(many=True)
 projets_schema = ProjetSchema(many=True)
 jalons_schema = JalonSchema(many=True)
+events_schema = EventSchema(many=True)
 jalon_schema = JalonSchema()
 
 
@@ -228,6 +229,28 @@ class UserApi(MethodResource,Resource):
 
 api.add_resource(UserApi, '/api/v1/user')
 
+class EventApi(MethodResource,Resource):
+    @marshal_with(events_schema)    
+    def get(self):
+        "GET all events"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            events = session.query(Events).all()
+            return events_schema.dump(events)
+        else:            
+            return ({'message':'token not valid or expired'}, 400)
+        
+
+    def post(self):
+                   
+        return 
+        
+
+api.add_resource(EventApi, '/api/v1/event')
+
+
+
+
 app.config.update({
     'APISPEC_SPEC': APISpec(
         title='planproj',
@@ -245,3 +268,4 @@ docs.register(UserApi)
 docs.register(ProjetApi)
 docs.register(JalonApi)
 docs.register(EditJalonApi)
+docs.register(EventApi)
