@@ -50,6 +50,7 @@ users_schema = UserSchema(many=True)
 projets_schema = ProjetSchema(many=True)
 jalons_schema = JalonSchema(many=True)
 events_schema = EventSchema(many=True)
+event_schema = EventSchema()
 jalon_schema = JalonSchema()
 
 
@@ -223,7 +224,7 @@ class UserApi(MethodResource,Resource):
         
 
     def post(self):
-                   
+                  
         return 
         
 
@@ -242,11 +243,44 @@ class EventApi(MethodResource,Resource):
         
 
     def post(self):
-                   
-        return 
-        
+        "POST a new Event"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            data = request.get_json(force=True)   
+            newEvents = events_schema.make_events(data)
+            session.add(newEvents)
+            session.commit()
+        return events_schema.dump(data)
 
 api.add_resource(EventApi, '/api/v1/event')
+
+class EditEventApi(MethodResource,Resource):
+    def put(self, event_id):
+        "Edit the date of Events"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            event = session.query(Events).filter_by(id=event_id).first()
+            if not event:
+                return ({'message':'there no event with this id'}, 400)
+            event.date = request.args.get('date')
+            session.commit()
+            return event_schema.dump(event)
+        return ({'message':'token not valid or expired'}, 400)
+
+    def delete(self, event_id):
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            event = session.query(Events).filter_by(id=event_id).first()
+            if not event:
+                return ({'message':'there no event with this id'}, 400)
+            session.delete(event)
+            session.commit()
+            return event_schema.dump(event)
+        return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(EditEventApi, '/api/v1/event/<int:event_id>')    
+
+
 
 
 
@@ -269,3 +303,4 @@ docs.register(ProjetApi)
 docs.register(JalonApi)
 docs.register(EditJalonApi)
 docs.register(EventApi)
+docs.register(EditEventApi)
