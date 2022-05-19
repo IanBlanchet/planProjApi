@@ -190,6 +190,7 @@ class EditJalonApi(MethodResource,Resource):
             jalon.commentaire = data.get('commentaire')
             jalon.etat = data.get('etat')
             jalon.charge_jalon = data.get('charge_jalon')
+            jalon.duree = data.get('duree')
             session.commit()
             return jalon_schema.dump(jalon)
         else:
