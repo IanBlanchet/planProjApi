@@ -1,9 +1,10 @@
 
+from builtins import print
 from os import access
 from flask.wrappers import Request
 from sqlalchemy import delete, false, true
 from app.API import bp
-from app.models import Projet, Contrat, User, Jalon, Events
+from app.models import Projet, Contrat, User, Jalon, Events, Pti
 from app import app
 from app.config import session, engine, Config
 from flask_restful import Resource, Api, abort
@@ -18,7 +19,7 @@ import secrets
 import jwt
 #from flask_jwt_extended import create_access_token
 from time import time
-from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema, EventSchema
+from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema, EventSchema, PtiSchema
 import json
 import msal
 
@@ -52,6 +53,8 @@ jalons_schema = JalonSchema(many=True)
 events_schema = EventSchema(many=True)
 event_schema = EventSchema()
 jalon_schema = JalonSchema()
+pti_schema = PtiSchema()
+ptis_schema = PtiSchema(many=True)
 
 
 class AuthApi(MethodResource,Resource):
@@ -134,6 +137,79 @@ class ProjetApi(MethodResource,Resource):
 
 api.add_resource(ProjetApi, '/api/v1/projet')
 
+
+class DepenseApi(MethodResource,Resource):
+    def get(self, projet_id):
+        "extract depense"
+        token = request.headers.get('HTTP_AUTHORIZATION')
+        if isAutorize(token):
+            projet = session.query(Projet).filter_by(id = projet_id).first() 
+            anterieur, courante = projet.calcDepense()
+
+            return ({'anterieur':anterieur, 'courante':courante}, 200)
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(DepenseApi, '/api/v1/depense/<int:projet_id>')
+
+
+class PtiApi(MethodResource,Resource):
+    def get(self, projet_id):
+        "extract PTI"
+        token = request.headers.get('HTTP_AUTHORIZATION')
+        if isAutorize(token):
+            projet = session.query(Projet).filter_by(id = projet_id).first()
+            ptiCourant, ptiEnPrep = projet.extractPtiCourant()                      
+            return {'ptiCourant':pti_schema.dump(ptiCourant), 'ptiEnPrep':pti_schema.dump(ptiEnPrep), 'prev_courante':projet.prev_courante}
+            
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+    def post(self, projet_id):
+        "add or edit PTI"
+        token = request.headers.get('HTTP_AUTHORIZATION')
+        if isAutorize(token):
+            data = request.get_json(force=True)
+            projet = session.query(Projet).filter_by(id = projet_id).first()
+            ptiCourant, ptiEnPrep = projet.extractPtiCourant()
+            if ptiEnPrep:
+                pti = session.query(Pti).filter(Pti.projet_id==projet.id, Pti.annee==ptiEnPrep.annee).first()            
+                
+                pti.cycleCour= data['cycleCour']
+                pti.cycle2 = data['cycle2']
+                pti.cycle3 = data['cycle3']
+                pti.cycle4 = data['cycle4']
+                pti.cycle5 = data['cycle5']
+                session.commit()                
+            else:
+                print(data)
+                newPti = ptis_schema.make_pti(data)
+                session.add(newPti)
+                session.commit()
+
+            
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(PtiApi, '/api/v1/pti/<int:projet_id>')
+
+
+class AllPtiApi(MethodResource, Resource):
+    def get(self, annee):
+        "extract all PTI for given year"
+        token = request.headers.get('HTTP_AUTHORIZATION')
+        if isAutorize(token):
+            pti = session.query(Pti).filter_by(annee = annee).all()
+            
+                      
+            return ptis_schema.dump(pti)
+            
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(AllPtiApi, '/api/v1/pti/all/<int:annee>')
+
+
 class JalonApi(MethodResource,Resource):
     @marshal_with(jalons_schema)    
     def get(self):
@@ -210,8 +286,6 @@ class EditJalonApi(MethodResource,Resource):
 api.add_resource(EditJalonApi, '/api/v1/jalon/<int:jalon_id>')
 
 
-
-
 class UserApi(MethodResource,Resource):
     @marshal_with(users_schema)    
     def get(self):
@@ -279,11 +353,7 @@ class EditEventApi(MethodResource,Resource):
             return event_schema.dump(event)
         return ({'message':'token not valid or expired'}, 400)
 
-api.add_resource(EditEventApi, '/api/v1/event/<int:event_id>')    
-
-
-
-
+api.add_resource(EditEventApi, '/api/v1/event/<int:event_id>')
 
 
 app.config.update({
@@ -305,3 +375,6 @@ docs.register(JalonApi)
 docs.register(EditJalonApi)
 docs.register(EventApi)
 docs.register(EditEventApi)
+docs.register(DepenseApi)
+docs.register(PtiApi)
+docs.register(AllPtiApi)
