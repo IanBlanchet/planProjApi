@@ -49,6 +49,7 @@ def isAutorize(encodeToken):
 contrats_schema = ContratSchema(many=True)
 users_schema = UserSchema(many=True)
 projets_schema = ProjetSchema(many=True)
+projet_schema = ProjetSchema()
 jalons_schema = JalonSchema(many=True)
 events_schema = EventSchema(many=True)
 event_schema = EventSchema()
@@ -137,6 +138,46 @@ class ProjetApi(MethodResource,Resource):
 
 api.add_resource(ProjetApi, '/api/v1/projet')
 
+class EditProjetApi(MethodResource,Resource):     
+    def get(self, projet_id):
+        "GET a projet"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            projet = session.query(Projet).filter_by(id= projet_id).first()            
+            return projet_schema.dump(projet)
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+    def put(self, projet_id):
+        "edit projet"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            data = request.get_json(force=True)            
+            projet = session.query(Projet).filter_by(id= projet_id).first()
+            for key in data:                
+                setattr(projet, key, data[key])                               
+                session.commit()
+                print('ok')
+            return projet_schema.dump(projet)   
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(EditProjetApi, '/api/v1/projet/<int:projet_id>')
+
+class FinanceApi(MethodResource,Resource):
+    def get(self, projet_id):
+        "extract source financement"
+        token = request.headers.get('HTTP_AUTHORIZATION')
+        if isAutorize(token):
+            projet = session.query(Projet).filter_by(id = projet_id).first() 
+            reglements, subventions, fonds = projet.extractFinance()
+            
+            return ({'reglements':reglements, 'subvention': subventions, 'fonds':fonds}, 200)
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(FinanceApi, '/api/v1/finance/<int:projet_id>')
+
 
 class DepenseApi(MethodResource,Resource):
     def get(self, projet_id):
@@ -155,7 +196,7 @@ api.add_resource(DepenseApi, '/api/v1/depense/<int:projet_id>')
 
 class PtiApi(MethodResource,Resource):
     def get(self, projet_id):
-        "extract PTI"
+        "extract PTI"        
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
             projet = session.query(Projet).filter_by(id = projet_id).first()
@@ -181,8 +222,7 @@ class PtiApi(MethodResource,Resource):
                 pti.cycle4 = data['cycle4']
                 pti.cycle5 = data['cycle5']
                 session.commit()                
-            else:
-                print(data)
+            else:                
                 newPti = ptis_schema.make_pti(data)
                 session.add(newPti)
                 session.commit()
@@ -200,7 +240,10 @@ class AllPtiApi(MethodResource, Resource):
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
             pti = session.query(Pti).filter_by(annee = annee).all()
-            
+            #ptiToDel = session.query(Pti).filter_by(id=179).first()
+            #print(ptiToDel.id)
+            #session.delete(ptiToDel)
+            #session.commit()
                       
             return ptis_schema.dump(pti)
             

@@ -28,9 +28,13 @@ class ProjetSchema(ma.Schema):
         model = Projet
         include_fk = True
         unknown = EXCLUDE
+        load_instance = True
         sqla_session = session
         fields = ('id', 'no_projet', 'desc', 'cat', 'immo', 'reglA', 'reglB', 'statut', 'affectation', 'prev_courante', 'nature', 'charge')
      
+     
+     
+
      @post_load
      def make_projet(self, data, **kwargs):
          return Projet(**data)

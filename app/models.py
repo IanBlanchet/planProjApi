@@ -98,6 +98,20 @@ class Projet(Base):
                 
                 return ptiCourant, ptiEnPrep
 	
+        def extractFinance(self):
+                reglements = []
+                for reglement in self.financeReglement:
+                        reglements.append({'no':reglement.reglement.numero, 'montant' :reglement.montant})
+
+                subventions = []
+                for subvention in self.financeSubvention:
+                        subventions.append({'nom':subvention.subvention.nomProg, 'montant':subvention.montant})
+                
+                fonds = []
+                for fond in self.financeFonds:
+                        fonds.append({'nom':fond.fonds.nom, 'montant':fond.montant})
+
+                return reglements, subventions, fonds
 
 
 class Troncon(Base):
