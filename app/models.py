@@ -2,14 +2,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from app.config import session, engine, Config
 from sqlalchemy import Column, Integer, String, Boolean, Float, Date, ForeignKey
 from sqlalchemy.orm import relationship
-
+from datetime import date
 from sqlalchemy.dialects.postgresql import JSONB
 from werkzeug.security import generate_password_hash, check_password_hash
 from time import time
 import jwt
 
 Base = declarative_base()
-
+annee = date.today().year
 
 
 class User(Base):
@@ -75,8 +75,43 @@ class Projet(Base):
 
         def __str__(self):
             return "{} - {}".format(self.no_projet, self.desc[:45])
+        
+        def calcDepense(self):
+                anterieur = 0
+                courante = 0
+                for depense in self.depense:
+                        if depense.annee == annee:
+                                courante += depense.montant
+                                continue
+                        anterieur += depense.montant
+                                        
+                return anterieur, courante
 	
+        def extractPtiCourant(self):
+                ptiCourant = ''
+                ptiEnPrep = ''
+                for pti in self.pti:
+                        if pti.annee == (annee-1):
+                                ptiCourant = pti
+                        elif pti.annee == annee:
+                                ptiEnPrep = pti
+                
+                return ptiCourant, ptiEnPrep
 	
+        def extractFinance(self):
+                reglements = []
+                for reglement in self.financeReglement:
+                        reglements.append({'no':reglement.reglement.numero, 'montant' :reglement.montant})
+
+                subventions = []
+                for subvention in self.financeSubvention:
+                        subventions.append({'nom':subvention.subvention.nomProg, 'montant':subvention.montant})
+                
+                fonds = []
+                for fond in self.financeFonds:
+                        fonds.append({'nom':fond.fonds.nom, 'montant':fond.montant})
+
+                return reglements, subventions, fonds
 
 
 class Troncon(Base):
