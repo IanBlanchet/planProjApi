@@ -172,7 +172,7 @@ class FinanceApi(MethodResource,Resource):
             projet = session.query(Projet).filter_by(id = projet_id).first() 
             reglements, subventions, fonds = projet.extractFinance()
             
-            return ({'reglements':reglements, 'subvention': subventions, 'fonds':fonds}, 200)
+            return ({'reglements':reglements, 'subventions': subventions, 'fonds':fonds}, 200)
         else:
             return ({'message':'token not valid or expired'}, 400)
 
@@ -239,11 +239,7 @@ class AllPtiApi(MethodResource, Resource):
         "extract all PTI for given year"
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
-            pti = session.query(Pti).filter_by(annee = annee).all()
-            #ptiToDel = session.query(Pti).filter_by(id=179).first()
-            #print(ptiToDel.id)
-            #session.delete(ptiToDel)
-            #session.commit()
+            pti = session.query(Pti).filter_by(annee = annee).all()            
                       
             return ptis_schema.dump(pti)
             
