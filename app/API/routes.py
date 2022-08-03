@@ -125,13 +125,20 @@ api.add_resource(ContratApi, '/api/v1/contrat')
 
 
 class ProjetApi(MethodResource,Resource):
-    @marshal_with(projets_schema)    
+    #@marshal_with(projets_schema)    
     def get(self):
         "GET all projet"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
             projet = session.query(Projet).all()
-            return projets_schema.dump(projet)
+            projets = projets_schema.dump(projet)
+            for index in range(len(projets)):                
+                x = session.query(Projet).filter_by(id = projets[index]['id']).first()
+                anterieur, courante = x.calcDepense()                
+                projets[index]['anterieur'] = anterieur
+                projets[index]['courante'] = courante     
+                     
+            return projets
         else:
             return ({'message':'token not valid or expired'}, 400)   
     
@@ -238,9 +245,13 @@ class AllPtiApi(MethodResource, Resource):
         "extract all PTI for given year"
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
-            pti = session.query(Pti).filter_by(annee = annee).all()            
-                      
-            return ptis_schema.dump(pti)
+            pti = session.query(Pti).filter_by(annee = annee).all()
+            lesptis = ptis_schema.dump(pti)        
+            for index in range(len(lesptis)):                
+                x = session.query(Projet).filter_by(id = lesptis[index]['projet_id']).first()
+                lesptis[index]['no_projet'] = x.no_projet
+                lesptis[index]['description'] = x.desc     
+            return lesptis
             
         else:
             return ({'message':'token not valid or expired'}, 400)
