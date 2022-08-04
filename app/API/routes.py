@@ -18,7 +18,7 @@ from flask_apispec import marshal_with
 import secrets
 import jwt
 #from flask_jwt_extended import create_access_token
-from time import time
+import time
 from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema, EventSchema, PtiSchema
 import json
 import msal
@@ -125,13 +125,23 @@ api.add_resource(ContratApi, '/api/v1/contrat')
 
 
 class ProjetApi(MethodResource,Resource):
-    @marshal_with(projets_schema)    
+    #@marshal_with(projets_schema)    
     def get(self):
         "GET all projet"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
-            projet = session.query(Projet).all()
-            return projets_schema.dump(projet)
+            
+            projet = session.query(Projet).filter_by(statut = 'Actif').all()
+            
+            '''for index in range(len(projet)):
+                anterieur, courante = projet[index].calcDepense()   
+                projet[index].anterieur = anterieur
+                projet[index].courante = courante'''
+            
+            projets = projets_schema.dump(projet)          
+            
+                  
+            return projets
         else:
             return ({'message':'token not valid or expired'}, 400)   
     
@@ -237,10 +247,20 @@ class AllPtiApi(MethodResource, Resource):
     def get(self, annee):
         "extract all PTI for given year"
         token = request.headers.get('HTTP_AUTHORIZATION')
-        if isAutorize(token):
-            pti = session.query(Pti).filter_by(annee = annee).all()            
-                      
-            return ptis_schema.dump(pti)
+        if isAutorize(token):            
+            pti = session.query(Pti).filter_by(annee = annee).all()
+            
+            lesptis = ptis_schema.dump(pti)        
+            for index in range(len(lesptis)):                
+                x = session.query(Projet).filter_by(id = lesptis[index]['projet_id']).first()
+                anterieur, courante = x.calcDepense()
+                lesptis[index]['no_projet'] = x.no_projet
+                lesptis[index]['description'] = x.desc
+                lesptis[index]['anterieur'] = anterieur 
+            
+            
+            
+            return lesptis
             
         else:
             return ({'message':'token not valid or expired'}, 400)

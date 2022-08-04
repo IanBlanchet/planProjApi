@@ -30,14 +30,16 @@ class ProjetSchema(ma.Schema):
         unknown = EXCLUDE
         load_instance = True
         sqla_session = session
-        fields = ('id', 'no_projet', 'desc', 'cat', 'immo', 'reglA', 'reglB', 'statut', 'affectation', 'prev_courante', 'nature', 'charge')
-     
-     
-     
+        fields = ('id', 'no_projet', 'desc', 'cat', 'immo', 'reglA', 'reglB', 'statut', 'affectation', 'prev_courante', 'nature', 'charge', 'anterieur', 'courante')
+         
 
      @post_load
      def make_projet(self, data, **kwargs):
-         return Projet(**data)
+        for index in range(len(data)):
+            anterieur, courante = data[index].calcDepense()   
+            data[index].anterieur = anterieur
+            data[index].courante = courante
+        return Projet(**data)
     
     
 
