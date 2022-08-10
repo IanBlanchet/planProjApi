@@ -26,9 +26,7 @@ import msal
 
 
 
-appGraph = msal.ConfidentialClientApplication(
-        client_id=Config.client_id, authority=Config.tenant,
-        client_credential=Config.secret)
+#appGraph = msal.ConfidentialClientApplication( client_id=Config.client_id, authority=Config.tenant, client_credential=Config.secret)
 
 
 
@@ -71,7 +69,7 @@ class AuthApi(MethodResource,Resource):
         data = request.get_json(force=True)
         
         user = session.query(User).filter_by(username = data['username']).first()
-        msToken = appGraph.acquire_token_by_username_password('blanchia@ville.valleyfield.qc.ca', password=Config.office_pass, scopes=['https://graph.microsoft.com/.default'])
+        #msToken = appGraph.acquire_token_by_username_password('blanchia@ville.valleyfield.qc.ca', password=Config.office_pass, scopes=['https://graph.microsoft.com/.default'])
         if user:
             if user.check_password(data['password']):
                 expires = timedelta(days=1)
@@ -82,7 +80,7 @@ class AuthApi(MethodResource,Resource):
                     'isUser':'true',
                     'isLogged' : 'true',
                     'token':access_token,
-                    'msToken': msToken['access_token'],
+                    #'msToken': msToken['access_token'],
                     'message':'successfull login'}, 200)
             else:
                 return ({
@@ -131,16 +129,8 @@ class ProjetApi(MethodResource,Resource):
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
             
-            projet = session.query(Projet).filter_by(statut = 'Actif').all()
-            
-            '''for index in range(len(projet)):
-                anterieur, courante = projet[index].calcDepense()   
-                projet[index].anterieur = anterieur
-                projet[index].courante = courante'''
-            
-            projets = projets_schema.dump(projet)          
-            
-                  
+            projet = session.query(Projet).filter_by(statut = 'Actif').all()  
+            projets = projets_schema.dump(projet)                  
             return projets
         else:
             return ({'message':'token not valid or expired'}, 400)   
@@ -250,16 +240,14 @@ class AllPtiApi(MethodResource, Resource):
         if isAutorize(token):            
             pti = session.query(Pti).filter_by(annee = annee).all()
             
-            lesptis = ptis_schema.dump(pti)        
+            lesptis = ptis_schema.dump(pti)
+            #pourrait être au niveau du schema comme pour les projets       
             for index in range(len(lesptis)):                
                 x = session.query(Projet).filter_by(id = lesptis[index]['projet_id']).first()
                 anterieur, courante = x.calcDepense()
                 lesptis[index]['no_projet'] = x.no_projet
                 lesptis[index]['description'] = x.desc
-                lesptis[index]['anterieur'] = anterieur 
-            
-            
-            
+                lesptis[index]['anterieur'] = anterieur            
             return lesptis
             
         else:

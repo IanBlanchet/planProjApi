@@ -1,6 +1,6 @@
 from app.config import Config
 from app.config import session, Base, engine
-from app.models import Contrat, Projet, Reglement, Subvention, Ass_reglement_projet
+from app.models import Contrat, Projet, Reglement, Subvention, Ass_reglement_projet, User
 import psycopg2
 from flask import Flask
 from flask_cors import CORS
@@ -26,6 +26,7 @@ admin = Admin(app, name='planProjet', template_mode='bootstrap4')
 #admin.add_view(ModelView(Reglement, session))
 #admin.add_view(ModelView(Subvention, session))
 #admin.add_view(ModelView(Ass_reglement_projet, session))
+admin.add_view(ModelView(User, session))
 
 from app.API import bp as API_bp
 app.register_blueprint(API_bp)
