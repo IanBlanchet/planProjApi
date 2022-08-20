@@ -15,7 +15,7 @@ class ContratSchema(ma.Schema):
         include_fk = True
         unknown = EXCLUDE
         sqla_session = session
-        fields = ('id', 'no', 'desc', 'projet_id')
+        fields = ('id', 'no', 'princ', 'desc', 'estimation', 'charge_contrat', 'projet_id')
         
     @post_load
     def make_contrat(self, data, **kwargs):
@@ -35,10 +35,10 @@ class ProjetSchema(ma.Schema):
 
      @post_load
      def make_projet(self, data, **kwargs):
-        for index in range(len(data)):
-            anterieur, courante = data[index].calcDepense()   
-            data[index].anterieur = anterieur
-            data[index].courante = courante
+        #for index in range(len(data)):
+            #anterieur, courante = data[index].calcDepense()   
+            #data[index].anterieur = anterieur
+            #data[index].courante = courante
         return Projet(**data)
     
     

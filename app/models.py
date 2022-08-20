@@ -1,3 +1,4 @@
+from email.policy import default
 from sqlalchemy.ext.declarative import declarative_base
 from app.config import session, engine, Config
 from sqlalchemy import Column, Integer, String, Boolean, Float, Date, ForeignKey
@@ -153,7 +154,7 @@ class Contrat(Base):
         releve = Column(String(45), index=True)
         surveillance = Column(String(45), index=True)
         livrable = Column(String(45), index=True)
-        statut = Column(String(20), index=True)
+        statut = Column(String(20), index=True, default='actif')
         charge_contrat = Column(Integer, ForeignKey('user.id'))
         projet_id =  Column(Integer, ForeignKey('projet.id'))
         jalon = relationship('Jalon', backref='contrat', lazy='dynamic')

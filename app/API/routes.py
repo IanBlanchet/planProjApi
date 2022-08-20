@@ -45,6 +45,7 @@ def isAutorize(encodeToken):
 
 # Serialize the data for the response
 contrats_schema = ContratSchema(many=True)
+contrat_schema = ContratSchema()
 users_schema = UserSchema(many=True)
 projets_schema = ProjetSchema(many=True)
 projet_schema = ProjetSchema()
@@ -113,9 +114,22 @@ class ContratApi(MethodResource,Resource):
         
     
     def post(self):
-        "Get all contrats"
-        contrat = session.query(Contrat).all()
-        return contrats_schema.dump(contrat)
+        "Add contrat"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            data = request.get_json(force=True)
+            try:           
+                newContrat = contrat_schema.make_contrat(data)
+                print(newContrat)
+                session.add(newContrat)            
+                session.commit()
+            except:
+                return ({'error':'le contrat ne peut être ajouté'})
+                         
+            return contrat_schema.dump(newContrat)   
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+        
         
 
 api.add_resource(ContratApi, '/api/v1/contrat')
@@ -129,13 +143,29 @@ class ProjetApi(MethodResource,Resource):
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
             
-            projet = session.query(Projet).filter_by(statut = 'Actif').all()  
+            projet = session.query(Projet).all()  
             projets = projets_schema.dump(projet)                  
             return projets
         else:
-            return ({'message':'token not valid or expired'}, 400)   
-    
+            return ({'message':'token not valid or expired'}, 400)
 
+    def post(self):
+        "add projet"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            data = request.get_json(force=True)
+            try:           
+                newProjet = projet_schema.make_projet(data)
+                session.add(newProjet)            
+                session.commit()
+            except:
+                return ({'error':'le projet ne peut être ajouté'})
+                         
+            return projet_schema.dump(newProjet)   
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+         
+     
 api.add_resource(ProjetApi, '/api/v1/projet')
 
 class EditProjetApi(MethodResource,Resource):     
