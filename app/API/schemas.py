@@ -1,4 +1,6 @@
-from app.models import Contrat, Projet, User, Jalon, Events, Pti
+from app.models import Contrat, Projet, User,\
+                        Jalon, Events, Pti, Reglement, Subvention, \
+                        Fonds
 from flask_marshmallow import Marshmallow
 from marshmallow import post_load, INCLUDE, EXCLUDE, fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
@@ -126,3 +128,38 @@ class PtiSchema(Schema):
         return Pti(**data)
         
 
+class ReglementSchema(ma.Schema):
+    class Meta:
+        model = Reglement
+        include_fk = True
+        unknown = EXCLUDE
+        sqla_session = session
+        fields = ('id', 'numero', 'montant')
+        
+    @post_load
+    def make_reglement(self, data, **kwargs):
+        return Reglement(**data)
+
+class SubventionSchema(ma.Schema):
+    class Meta:
+        model = Subvention
+        include_fk = True
+        unknown = EXCLUDE
+        sqla_session = session
+        fields = ('id', 'nomProg', 'no_id', 'montantAcc', 'montantFin')
+        
+    @post_load
+    def make_subvention(self, data, **kwargs):
+        return Subvention(**data)
+
+class FondsSchema(ma.Schema):
+    class Meta:
+        model = Fonds
+        include_fk = True
+        unknown = EXCLUDE
+        sqla_session = session
+        fields = ('id', 'nom', 'montantDisp')
+        
+    @post_load
+    def make_fonds(self, data, **kwargs):
+        return Fonds(**data)
