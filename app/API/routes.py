@@ -229,7 +229,8 @@ class PtiApi(MethodResource,Resource):
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
             projet = session.query(Projet).filter_by(id = projet_id).first()
-            ptiCourant, ptiEnPrep = projet.extractPtiCourant()                      
+            ptiCourant, ptiEnPrep = projet.extractPtiCourant() 
+                               
             return {'ptiCourant':pti_schema.dump(ptiCourant), 'ptiEnPrep':pti_schema.dump(ptiEnPrep), 'prev_courante':projet.prev_courante}
             
         else:
@@ -259,7 +260,7 @@ class PtiApi(MethodResource,Resource):
         else:
             return ({'message':'token not valid or expired'}, 400)
 
-    def delete(self, projet_id):
+    '''def delete(self, projet_id):
         "delete PTI"        
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
@@ -268,7 +269,7 @@ class PtiApi(MethodResource,Resource):
             return {'ptiCourant':pti_schema.dump(ptiCourant), 'ptiEnPrep':pti_schema.dump(ptiEnPrep), 'prev_courante':projet.prev_courante}
             
         else:
-            return ({'message':'token not valid or expired'}, 400)
+            return ({'message':'token not valid or expired'}, 400)'''
 
 api.add_resource(PtiApi, '/api/v1/pti/<int:projet_id>')
 
