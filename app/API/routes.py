@@ -136,6 +136,31 @@ class ContratApi(MethodResource,Resource):
 api.add_resource(ContratApi, '/api/v1/contrat')
 
 
+class EditContratApi(MethodResource,Resource):     
+    def get(self, contrat_id):
+        "GET a contrat"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            contrat = session.query(Contrat).filter_by(id= contrat_id).first()            
+            return contrat_schema.dump(contrat)
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+    def put(self, contrat_id):
+        "edit contrat"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            data = request.get_json(force=True)            
+            contrat = session.query(Contrat).filter_by(id= contrat_id).first()
+            for key in data:                
+                setattr(contrat, key, data[key])                               
+                session.commit()                
+            return contrat_schema.dump(contrat)   
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(EditContratApi, '/api/v1/contrat/<int:contrat_id>')
+
 
 class ProjetApi(MethodResource,Resource):
     #@marshal_with(projets_schema)    
@@ -164,30 +189,7 @@ class ProjetApi(MethodResource,Resource):
                          
             return projet_schema.dump(newProjet)   
         else:
-            return ({'message':'token not valid or expired'}, 400)
-
-    def put(self):
-        "edit projet"
-        token = request.headers.get('HTTP_AUTHORIZATION')        
-        if isAutorize(token):
-            data = request.get_json(force=True)
-            projet_id = request.args.get('projet_id')
-            try:           
-                projet = session.query(Projet).filter_by(id = projet_id).first()
-                projet.no_projet = data['no_projet']
-                projet.desc = data['desc']
-                projet.cat = data['cat']
-                projet.charge = data['charge']
-                projet.affectation = data['affectation']
-                projet.immo = data['immo']          
-                session.commit()
-            except:
-                return ({'error':'le projet ne peut être modifié'})
-                         
-            return 
-        else:
-            return ({'message':'token not valid or expired'}, 400)
-         
+            return ({'message':'token not valid or expired'}, 400)         
      
 api.add_resource(ProjetApi, '/api/v1/projet')
 
@@ -494,8 +496,10 @@ app.config.update({
 docs = FlaskApiSpec(app)
 
 docs.register(ContratApi)
+docs.register(EditContratApi)
 docs.register(UserApi)
 docs.register(ProjetApi)
+docs.register(EditProjetApi)
 docs.register(JalonApi)
 docs.register(EditJalonApi)
 docs.register(EventApi)
