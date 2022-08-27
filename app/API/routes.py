@@ -154,7 +154,8 @@ class EditContratApi(MethodResource,Resource):
             contrat = session.query(Contrat).filter_by(id= contrat_id).first()
             for key in data:                
                 setattr(contrat, key, data[key])                               
-                session.commit()                
+            session.commit()
+                               
             return contrat_schema.dump(contrat)   
         else:
             return ({'message':'token not valid or expired'}, 400)
@@ -211,7 +212,7 @@ class EditProjetApi(MethodResource,Resource):
             projet = session.query(Projet).filter_by(id= projet_id).first()
             for key in data:                
                 setattr(projet, key, data[key])                               
-                session.commit()                
+            session.commit()                
             return projet_schema.dump(projet)   
         else:
             return ({'message':'token not valid or expired'}, 400)
