@@ -1,6 +1,7 @@
 
 from builtins import print
 from os import access
+from threading import Timer
 from flask.wrappers import Request
 from sqlalchemy import delete, false, true
 from app.API import bp
@@ -164,6 +165,28 @@ class ProjetApi(MethodResource,Resource):
             return projet_schema.dump(newProjet)   
         else:
             return ({'message':'token not valid or expired'}, 400)
+
+    def put(self):
+        "edit projet"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            data = request.get_json(force=True)
+            projet_id = request.args.get('projet_id')
+            try:           
+                projet = session.query(Projet).filter_by(id = projet_id).first()
+                projet.no_projet = data['no_projet']
+                projet.desc = data['desc']
+                projet.cat = data['cat']
+                projet.charge = data['charge']
+                projet.affectation = data['affectation']
+                projet.immo = data['immo']          
+                session.commit()
+            except:
+                return ({'error':'le projet ne peut être modifié'})
+                         
+            return 
+        else:
+            return ({'message':'token not valid or expired'}, 400)
          
      
 api.add_resource(ProjetApi, '/api/v1/projet')
@@ -295,10 +318,9 @@ class AllPtiApi(MethodResource, Resource):
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):            
             pti = session.query(Pti).filter_by(annee = annee).all()
-            
             lesptis = ptis_schema.dump(pti)
             #pourrait être au niveau du schema comme pour les projets       
-            for index in range(len(lesptis)):                
+            for index in range(len(lesptis)):                               
                 x = session.query(Projet).filter_by(id = lesptis[index]['projet_id']).first()
                 anterieur, courante = x.calcDepense()
                 lesptis[index]['no_projet'] = x.no_projet
