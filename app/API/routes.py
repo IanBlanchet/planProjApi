@@ -327,6 +327,7 @@ class AllPtiApi(MethodResource, Resource):
                 x = session.query(Projet).filter_by(id = lesptis[index]['projet_id']).first()
                 anterieur, courante = x.calcDepense()
                 lesptis[index]['id'] = x.id
+                lesptis[index]['prev_courante'] = x.prev_courante
                 lesptis[index]['no_projet'] = x.no_projet
                 lesptis[index]['description'] = x.desc
                 lesptis[index]['anterieur'] = anterieur 
