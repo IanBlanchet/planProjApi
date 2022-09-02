@@ -1,6 +1,6 @@
 from app.models import Contrat, Projet, User,\
                         Jalon, Events, Pti, Reglement, Subvention, \
-                        Fonds
+                        Fonds, Ass_reglement_projet
 from flask_marshmallow import Marshmallow
 from marshmallow import post_load, INCLUDE, EXCLUDE, fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
@@ -163,3 +163,15 @@ class FondsSchema(ma.Schema):
     @post_load
     def make_fonds(self, data, **kwargs):
         return Fonds(**data)
+
+class AssReglementSchema(ma.Schema):
+    class Meta:
+        model = Ass_reglement_projet
+        include_fk = True
+        unknown = EXCLUDE
+        sqla_session = session
+        fields = ('montant', 'reglement_id', 'projet_id')
+        
+    @post_load
+    def make_ass_reglement_projet(self, data, **kwargs):
+        return Ass_reglement_projet(**data)
