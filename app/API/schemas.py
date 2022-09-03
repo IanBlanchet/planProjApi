@@ -1,6 +1,6 @@
 from app.models import Contrat, Projet, User,\
                         Jalon, Events, Pti, Reglement, Subvention, \
-                        Fonds, Ass_reglement_projet
+                        Fonds, Ass_reglement_projet, Ass_fonds_projet, Ass_subvention_projet
 from flask_marshmallow import Marshmallow
 from marshmallow import post_load, INCLUDE, EXCLUDE, fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
@@ -134,7 +134,7 @@ class ReglementSchema(ma.Schema):
         include_fk = True
         unknown = EXCLUDE
         sqla_session = session
-        fields = ('id', 'numero', 'montant')
+        fields = ('id', 'numero', 'montant', 'ratioSecteur')
         
     @post_load
     def make_reglement(self, data, **kwargs):
@@ -175,3 +175,27 @@ class AssReglementSchema(ma.Schema):
     @post_load
     def make_ass_reglement_projet(self, data, **kwargs):
         return Ass_reglement_projet(**data)
+
+class AssFondsSchema(ma.Schema):
+    class Meta:
+        model = Ass_fonds_projet
+        include_fk = True
+        unknown = EXCLUDE
+        sqla_session = session
+        fields = ('montant', 'fonds_id', 'projet_id')
+        
+    @post_load
+    def make_ass_fonds_projet(self, data, **kwargs):
+        return Ass_fonds_projet(**data)
+
+class AssSubventionSchema(ma.Schema):
+    class Meta:
+        model = Ass_subvention_projet
+        include_fk = True
+        unknown = EXCLUDE
+        sqla_session = session
+        fields = ('montant', 'subvention_id', 'projet_id')
+        
+    @post_load
+    def make_ass_subvention_projet(self, data, **kwargs):
+        return Ass_subvention_projet(**data)

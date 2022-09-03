@@ -180,6 +180,7 @@ class Reglement(Base):
         id = Column(Integer, primary_key=True)
         numero = Column(String(10), index=True, unique=True)
         montant = Column(Integer)
+        ratioSecteur = Column(Float)
         financeProjet = relationship('Ass_reglement_projet', backref='reglement')
         def __str__(self):
             return "{} - {}".format(self.numero, self.montant)

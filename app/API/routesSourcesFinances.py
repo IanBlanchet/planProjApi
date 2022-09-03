@@ -17,7 +17,8 @@ from flask_apispec import marshal_with
 import secrets
 import jwt
 import time
-from app.API.schemas import ProjetSchema, ReglementSchema, SubventionSchema, FondsSchema, AssReglementSchema
+from app.API.schemas import ProjetSchema, ReglementSchema, SubventionSchema, \
+        FondsSchema, AssReglementSchema, AssFondsSchema, AssSubventionSchema
 import json
 
 
@@ -41,6 +42,8 @@ reglements_schema = ReglementSchema(many=True)
 subventions_schema = SubventionSchema(many=True)
 fonds_schema = FondsSchema(many=True)
 ass_reglement_schema = AssReglementSchema(many=True)
+ass_fonds_schema = AssFondsSchema(many=True)
+ass_subvention_schema = AssSubventionSchema(many=True)
 
 class ReglementApi(MethodResource,Resource):
     def get(self):
@@ -117,17 +120,21 @@ class AffecteFinancement(MethodResource,Resource):
 
 api.add_resource(AffecteFinancement, '/api/v1/affectefinance')
 
-class AssReglement(MethodResource,Resource):
+class AssFinance(MethodResource,Resource):
     def get(self):
-        "extrait les financements par reglement"
+        "extrait les financements "
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
-            assReglement = session.query(Ass_reglement_projet).all()    
+            assReglement = session.query(Ass_reglement_projet).all()
+            assFonds = session.query(Ass_fonds_projet).all()
+            assSubvention = session.query(Ass_subvention_projet).all()    
 
-            return ass_reglement_schema.dump(assReglement)
+            return {'assReglement':ass_reglement_schema.dump(assReglement),
+                    'assFonds':ass_fonds_schema.dump(assFonds),
+                    'assSubvention':ass_subvention_schema.dump(assSubvention)}
         else:
             return ({'message':'token not valid or expired'}, 400)
     
 
-api.add_resource(AssReglement, '/api/v1/assreglement')
+api.add_resource(AssFinance, '/api/v1/assfinance')
 
