@@ -117,6 +117,32 @@ class AffecteFinancement(MethodResource,Resource):
         else:
             return ({'message':'token not valid or expired'}, 400)
     
+    def put(self):
+        "edit an associated source of financing"
+        token = request.headers.get('HTTP_AUTHORIZATION')
+        if isAutorize(token):
+            data = request.get_json(force=True)
+
+            for item in data :
+                if item == 'reglements':                    
+                    AssReglement = session.query(Ass_reglement_projet).filter_by(reglement_id = data['reglements']['id'], projet_id=data['reglements']['projet']).first()
+                    AssReglement.montant=data['reglements']['montant']                                       
+                    session.commit()
+                elif item == 'subventions':
+                    AssSubvention = session.query(Ass_subvention_projet).filter_by(subvention_id=data['subventions']['id'], projet_id=data['subventions']['projet']).first()
+                    AssSubvention.montant=data['subventions']['montant']
+                    session.commit()
+                elif item == 'fonds':
+                    AssFonds = session.query(Ass_fonds_projet).filter_by(fonds_id=data['fonds']['id'], projet_id=data['fonds']['projet']).first()
+                    AssFonds.montant=data['fonds']['montant']
+                    session.commit()
+                
+
+            return ({'message':'ok'}, 200)
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+     
 
 api.add_resource(AffecteFinancement, '/api/v1/affectefinance')
 
@@ -135,6 +161,7 @@ class AssFinance(MethodResource,Resource):
         else:
             return ({'message':'token not valid or expired'}, 400)
     
+
 
 api.add_resource(AssFinance, '/api/v1/assfinance')
 
