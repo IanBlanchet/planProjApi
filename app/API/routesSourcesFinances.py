@@ -142,6 +142,30 @@ class AffecteFinancement(MethodResource,Resource):
         else:
             return ({'message':'token not valid or expired'}, 400)
 
+    def delete(self):
+        "delete an associated source of financing"
+        token = request.headers.get('HTTP_AUTHORIZATION')
+        if isAutorize(token):
+            data = request.get_json(force=True)
+
+            for item in data :
+                if item == 'reglements':                    
+                    AssReglement = session.query(Ass_reglement_projet).filter_by(reglement_id = data['reglements']['id'], projet_id=data['reglements']['projet']).first()
+                    session.delete(AssReglement)                                   
+                    session.commit()
+                elif item == 'subventions':
+                    AssSubvention = session.query(Ass_subvention_projet).filter_by(subvention_id=data['subventions']['id'], projet_id=data['subventions']['projet']).first()
+                    session.delete(AssSubvention) 
+                    session.commit()
+                elif item == 'fonds':
+                    AssFonds = session.query(Ass_fonds_projet).filter_by(fonds_id=data['fonds']['id'], projet_id=data['fonds']['projet']).first()
+                    session.delete(AssFonds) 
+                    session.commit()
+                
+
+            return ({'message':'ok'}, 200)
+        else:
+            return ({'message':'token not valid or expired'}, 400)
      
 
 api.add_resource(AffecteFinancement, '/api/v1/affectefinance')
