@@ -65,6 +65,7 @@ class Projet(Base):
         affectation = Column(String(45), index=True)  # 3 choix : D2D3, SD2SD3, D3
         prev_courante = Column(Float)
         nature = Column(JSONB)
+        rating = Column(JSONB)
         troncon = relationship('Troncon', backref='projet', lazy='dynamic')
         pti = relationship('Pti', backref='projet', lazy='dynamic')
         depense = relationship('Depense', backref='projet', lazy='dynamic')
