@@ -328,6 +328,7 @@ class AllPtiApi(MethodResource, Resource):
                 anterieur, courante = x.calcDepense()
                 lesptis[index]['id'] = x.id
                 lesptis[index]['prev_courante'] = x.prev_courante
+                lesptis[index]['responsable_id'] = x.charge       
                 lesptis[index]['no_projet'] = x.no_projet
                 lesptis[index]['description'] = x.desc
                 lesptis[index]['anterieur'] = anterieur 
