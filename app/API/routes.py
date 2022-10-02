@@ -79,25 +79,24 @@ class AuthApi(MethodResource,Resource):
                 #access_token = create_access_token(identity=str(user.id), expires_delta=expires)
                 
                 return ({
-                    'isUser':'true',
-                    'isLogged' : 'true',
-                    'token':access_token,
-                    #'msToken': msToken['access_token'],
+                    'isUser':True,
+                    'isLogged' : True,
+                    'token':access_token,                    
                     'message':'successfull login'}, 200)
             else:
                 return ({
-                'isUser':'true',
-                'isLogged':'false',
+                'isUser': True,
+                'isLogged':False,
                 'token':"",
-                'message':'error'})
+                'message':'error'}, 200)
 
         
         else:
             return ({
-                'isUser':'false',
-                'isLogged':'false',
+                'isUser':False,
+                'isLogged':False,
                 'token':"",
-                'message':'error'})
+                'message':'error'}, 400)
         
 
 api.add_resource(AuthApi, '/api/v1/autorize')
