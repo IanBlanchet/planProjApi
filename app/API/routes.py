@@ -2,6 +2,7 @@
 from builtins import print
 from os import access
 from threading import Timer
+
 from flask.wrappers import Request
 from sqlalchemy import delete, false, true
 from app.API import bp
@@ -17,6 +18,8 @@ from flask_apispec.extension import FlaskApiSpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec import marshal_with
 import secrets
+
+
 import jwt
 #from flask_jwt_extended import create_access_token
 import time
@@ -48,6 +51,7 @@ def isAutorize(encodeToken):
 contrats_schema = ContratSchema(many=True)
 contrat_schema = ContratSchema()
 users_schema = UserSchema(many=True)
+user_schema = UserSchema()
 projets_schema = ProjetSchema(many=True)
 projet_schema = ProjetSchema()
 jalons_schema = JalonSchema(many=True)
@@ -346,8 +350,7 @@ class JalonApi(MethodResource,Resource):
         "GET all jalons"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
-            jalon = session.query(Jalon).all()
-                     
+            jalon = session.query(Jalon).all()            
             return jalons_schema.dump(jalon)
         else:
             return ({'message':'token not valid or expired'}, 400)   

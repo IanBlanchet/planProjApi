@@ -82,7 +82,7 @@ class JalonSchema(Schema):
     charge_jalon = fields.Integer()
     projet_id =  fields.Integer()
     contrat_id =  fields.Integer()
-    duree = fields.Integer()
+    duree = fields.Integer()   
 
 
     @post_load
