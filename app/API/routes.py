@@ -336,6 +336,7 @@ class AllPtiApi(MethodResource, Resource):
                 lesptis[index]['description'] = x.desc
                 lesptis[index]['anterieur'] = anterieur 
                 lesptis[index]['nature'] = x.nature
+                lesptis[index]['cat'] = x.cat
                 lesptis[index]['statut'] = x.statut       
             return lesptis
             
