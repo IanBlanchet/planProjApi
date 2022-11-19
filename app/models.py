@@ -60,7 +60,7 @@ class Projet(Base):
         immo = Column(Boolean, index=True)
         reglA = Column(Integer, index=True)#cont : \d{3}
         reglB = Column(Integer, index=True)#cont : \d{3}
-        statut = Column(String(20), index=True, default='Actif')
+        statut = Column(String(20), index=True, default='En approbation')
         charge = Column(Integer, ForeignKey('user.id'))
         affectation = Column(String(45), index=True)  # 3 choix : D2D3, SD2SD3, D3
         prev_courante = Column(Float)
