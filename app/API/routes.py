@@ -377,7 +377,7 @@ class JalonApi(MethodResource,Resource):
             contrat_id=contrat_id, commentaire=commentaire)
             session.add(newJalon)
             session.commit()  
-            return jalons_schema.dump(data)
+            return jalon_schema.dump(newJalon)
         else:
             return ({'message':'token not valid or expired'}, 400) 
 
