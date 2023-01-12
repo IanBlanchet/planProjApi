@@ -86,13 +86,15 @@ class AuthApi(MethodResource,Resource):
                     'isUser':True,
                     'isLogged' : True,
                     'token':access_token,                    
-                    'message':'successfull login'}, 200)
+                    'message':'successfull login',
+                    'user':user_schema.dump(user)}, 200)
             else:
                 return ({
                 'isUser': True,
                 'isLogged':False,
                 'token':"",
-                'message':'error'}, 200)
+                'message':'password incorrect',
+                'user':None}, 400)
 
         
         else:
@@ -100,7 +102,8 @@ class AuthApi(MethodResource,Resource):
                 'isUser':False,
                 'isLogged':False,
                 'token':"",
-                'message':'error'}, 400)
+                'message':'user not defined',
+                'user':None}, 400)
         
 
 api.add_resource(AuthApi, '/api/v1/autorize')
@@ -173,7 +176,20 @@ class ProjetApi(MethodResource,Resource):
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
             
-            projet = session.query(Projet).all()  
+            projet = session.query(Projet).all()
+            #activer pour changer la nature
+            """for item in projet:
+                newNature = {'nature': [' '], 'justification':[' '], 'refus':[' '], 'tempsCharge':0, 'tempsTech' :0, 'services':[], 'avancement':0, 'impacts':[], 'isStrategic':True, 'echeance':'', 'notes':'' }
+                if item.nature:
+                    for k, v in item.nature.items():
+                        newNature[k] = v
+                    item.nature = newNature
+                        
+                else:
+                    item.nature = newNature
+                print(newNature)
+                session.commit()"""
+
             projets = projets_schema.dump(projet)                  
             return projets
         else:

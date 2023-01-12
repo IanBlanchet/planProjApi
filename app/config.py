@@ -14,6 +14,9 @@ class Config(object):
 	token = os.environ.get('token')
 	DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///pos.db'
 	FLASK_APP = os.environ.get('FLASK_APP')
+	SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+
+
 	client_id = os.environ.get('CLIENT_ID')
 	tenant = os.environ.get('TENANT')
 	secret = os.environ.get('CLIENT_SECRET')
