@@ -126,12 +126,12 @@ class ContratApi(MethodResource,Resource):
         if isAutorize(token):
             data = request.get_json(force=True)
             try:           
-                newContrat = contrat_schema.make_contrat(data)
-                print(newContrat)
+                newContrat = contrat_schema.make_contrat(data)                
                 session.add(newContrat)            
                 session.commit()
             except:
                 return ({'error':'le contrat ne peut être ajouté'})
+                print('error')
                          
             return contrat_schema.dump(newContrat)   
         else:

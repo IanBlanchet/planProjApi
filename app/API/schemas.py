@@ -19,9 +19,13 @@ class ContratSchema(ma.Schema):
         sqla_session = session
         fields = ('id', 'no', 'princ', 'desc', 'estimation', 'statut', 'charge_contrat',  'projet_id')
         
+        
     @post_load
     def make_contrat(self, data, **kwargs):
-        return Contrat(**data)
+        newContrat = Contrat(**data)
+        if newContrat.projet_id == '':
+            newContrat.projet_id = None
+        return newContrat
 
 
 
@@ -37,10 +41,7 @@ class ProjetSchema(ma.Schema):
 
      @post_load
      def make_projet(self, data, **kwargs):
-        #for index in range(len(data)):
-            #anterieur, courante = data[index].calcDepense()   
-            #data[index].anterieur = anterieur
-            #data[index].courante = courante
+
         return Projet(**data)
     
     
