@@ -39,11 +39,14 @@ class User(Base):
 
         @staticmethod
         def verify_reset_password_token(token):
+            #id = jwt.decode(token, Config.SECRET_KEY, algorithms='HS256')['reset_password']
             try:
-                id = jwt.decode(token, Config['SECRET_KEY'], algorithms=['HS256'])['reset_password']
+                
+                id = jwt.decode(token, Config.SECRET_KEY, algorithms='HS256')['reset_password']
+                
             except:
                 return
-            return User.query.get(id)
+            return session.query(User).filter_by(id = id).first()
 
 
 
