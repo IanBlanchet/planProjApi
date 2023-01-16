@@ -19,7 +19,7 @@ class User(Base):
         username = Column(String(64), index=True, unique=True)
         email = Column(String(120), index=True, unique=True)
         password_hash = Column(String(128))
-        statut = Column(String(8))#actif, support, attente, archive, admin
+        statut = Column(String(8), default='attente')#actif, support, attente, archive, admin
         service = Column(String(10))
         projet = relationship('Projet', backref='charge_projet', lazy='dynamic')
         contrat = relationship('Contrat', backref='user', lazy='dynamic')

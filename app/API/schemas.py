@@ -60,6 +60,7 @@ class UserSchema(Schema):
     email = fields.String()
     statut = fields.String()
     service = fields.String()
+    password_hash = fields.String()
 
     @post_load
     def make_user(self, data, **kwargs):

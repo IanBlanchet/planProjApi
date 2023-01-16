@@ -24,8 +24,7 @@ def sendmail(sender, receiver ):
 
 
 def sendPasswordResetEmail(sender, user, token, domain):
-    
-       
+          
     url = domain+'/newpassword/?' + urllib.parse.urlencode({'token':token, 'email':user.email })
     
     print(url)
@@ -40,8 +39,24 @@ def sendPasswordResetEmail(sender, user, token, domain):
                     <a href={ url }>\
                     clique ici\
                     </a>.\
-                    </p>)'
+                    </p>'
     )
+    try:
+        sg = SendGridAPIClient(Config.SENDGRID_API_KEY)
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e)
+
+
+def newUserMail( newUser ):
+    message = Mail(
+        from_email='ian.blanchet@ville.valleyfield.qc.ca',
+        to_emails='ian.blanchet@ville.valleyfield.qc.ca',
+        subject='Nouvel usager',
+        html_content=f'<strong>le nouvel usager { newUser.username } - { newUser.email} </strong>')
     try:
         sg = SendGridAPIClient(Config.SENDGRID_API_KEY)
         response = sg.send(message)
