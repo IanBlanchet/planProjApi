@@ -27,11 +27,10 @@ class ResetPasswordRequest(MethodResource,Resource):
         
         if user :
             token = user.get_reset_password_token()
-            domain = data['url']
-            print(domain)
+            domain = data['url']            
             sendPasswordResetEmail('ian.blanchet@ville.valleyfield.qc.ca', user, token, domain)
             return ({'user':user_schema.dump(user)}, 200)
-        #sendmail("ian.blanchet@ville.valleyfield.qc.ca", "tag.ianblanchet@gmail.com")
+        
         return ({'user':None}, 400)
 
 api.add_resource(ResetPasswordRequest, '/api/v1/resetPasswordRequest')
