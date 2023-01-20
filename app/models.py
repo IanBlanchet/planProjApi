@@ -19,7 +19,7 @@ class User(Base):
         username = Column(String(64), index=True, unique=True)
         email = Column(String(120), index=True, unique=True)
         password_hash = Column(String(128))
-        statut = Column(String(8))#actif, support, attente, archive, admin
+        statut = Column(String(8), default='attente')#actif, support, attente, archive, admin
         service = Column(String(10))
         projet = relationship('Projet', backref='charge_projet', lazy='dynamic')
         contrat = relationship('Contrat', backref='user', lazy='dynamic')
@@ -39,11 +39,12 @@ class User(Base):
 
         @staticmethod
         def verify_reset_password_token(token):
-            try:
-                id = jwt.decode(token, Config['SECRET_KEY'], algorithms=['HS256'])['reset_password']
+            #id = jwt.decode(token, Config.SECRET_KEY, algorithms='HS256')['reset_password']
+            try:                
+                id = jwt.decode(token, Config.SECRET_KEY, algorithms='HS256')['reset_password']                
             except:
                 return
-            return User.query.get(id)
+            return session.query(User).filter_by(id = id).first()
 
 
 

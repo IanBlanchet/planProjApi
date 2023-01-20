@@ -18,6 +18,7 @@ from flask_apispec.extension import FlaskApiSpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec import marshal_with
 import secrets
+from app.API.email import newUserMail
 
 
 import jwt
@@ -75,13 +76,18 @@ class AuthApi(MethodResource,Resource):
         data = request.get_json(force=True)
         
         user = session.query(User).filter_by(username = data['username']).first()
+        
         #msToken = appGraph.acquire_token_by_username_password('blanchia@ville.valleyfield.qc.ca', password=Config.office_pass, scopes=['https://graph.microsoft.com/.default'])
         if user:
             if user.check_password(data['password']):
                 expires = timedelta(days=1)
                 access_token = jwt.encode({"exp":datetime.now() + expires}, Config.SECRET_KEY)
                 #access_token = create_access_token(identity=str(user.id), expires_delta=expires)
-                
+                if user.statut == 'attente':
+                    return ({
+                        "token":None,
+                        'message':'Usager en attente d\'approbation',
+                        'user':None}, 400)
                 return ({
                     'isUser':True,
                     'isLogged' : True,
@@ -450,8 +456,24 @@ class UserApi(MethodResource,Resource):
         
 
     def post(self):
+        "Add new user"
+        data = request.get_json(force=True)
+        
+        userByemail = session.query(User).filter_by(email = data['values']['email']).first()
+        userByUsername = session.query(User).filter_by(username = data['values']['username']).first()
+
+        if userByemail:
+            return ({'user':None, 'message':'Courriel déjà utilisé'},400)
+        elif userByUsername:
+            return ({'user':None, 'message':'Nom d\'usager existant'}, 400)
+
+        newUser = user_schema.make_user(data['values'])
+        newUser.set_password(data['pass'])
+        session.add(newUser)
+        session.commit()
+        newUserMail(newUser)
                   
-        return 
+        return ({'user':user_schema.dump(newUser)},200)
         
 
 api.add_resource(UserApi, '/api/v1/user')
