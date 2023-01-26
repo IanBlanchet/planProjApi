@@ -233,11 +233,15 @@ class EditProjetApi(MethodResource,Resource):
         "edit projet"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
-            data = request.get_json(force=True)            
-            projet = session.query(Projet).filter_by(id= projet_id).first()
+            data = request.get_json(force=True)
+           
+            projet = session.query(Projet).filter_by(id= projet_id).first()            
+                
             for key in data:                
-                setattr(projet, key, data[key])                               
-            session.commit()                
+                setattr(projet, key, data[key])
+            session.commit()
+                                       
+                         
             return projet_schema.dump(projet)   
         else:
             return ({'message':'token not valid or expired'}, 400)
