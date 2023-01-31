@@ -136,16 +136,30 @@ class ContratApi(MethodResource,Resource):
                 session.add(newContrat)            
                 session.commit()
             except:
-                return ({'error':'le contrat ne peut être ajouté'})
-                print('error')
+                return ({'error':'le contrat ne peut être ajouté'})                
                          
             return contrat_schema.dump(newContrat)   
         else:
-            return ({'message':'token not valid or expired'}, 400)
-        
+            return ({'message':'token not valid or expired'}, 400)        
         
 
 api.add_resource(ContratApi, '/api/v1/contrat')
+
+
+class ContratByProjectApi(MethodResource,Resource):
+       
+    def get(self, projet_id):
+        "GET all contrat associated to a project"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            projet = session.query(Projet).filter_by(id = projet_id).first()
+            
+            #contrat = session.query(Contrat).all()
+            return contrats_schema.dump(projet.contrat)
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(ContratByProjectApi, '/api/v1/contrat/by_project/<int:projet_id>')
 
 
 class EditContratApi(MethodResource,Resource):     

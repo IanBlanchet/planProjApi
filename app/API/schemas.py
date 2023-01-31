@@ -37,7 +37,7 @@ class ProjetSchema(ma.Schema):
         load_instance = True
         sqla_session = session
         fields = ('id', 'no_projet', 'desc', 'cat', 'immo', 'reglA', 'reglB', 'statut', 'affectation', 'prev_courante', 'nature', 'rating', 'charge', 'anterieur', 'courante')
-         
+        
 
      @post_load
      def make_projet(self, data, **kwargs):
