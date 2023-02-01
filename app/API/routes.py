@@ -405,7 +405,7 @@ class JalonApi(MethodResource,Resource):
             jalon = data['jalon']
             charge_jalon = data['charge_jalon']
             date = data['date']
-            if data['projet_id'] == None:
+            if (data['projet_id'] == None or data['projet_id'] == ''):
                 projet_id = None
                 contrat_id = data['contrat_id']
             else:
