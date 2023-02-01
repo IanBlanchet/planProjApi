@@ -401,11 +401,11 @@ class JalonApi(MethodResource,Resource):
         "ADD jalons"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
-            data = request.get_json(force=True)
+            data = request.get_json(force=True)            
             jalon = data['jalon']
             charge_jalon = data['charge_jalon']
             date = data['date']
-            if data['projet_id'] == '':
+            if data['projet_id'] == None:
                 projet_id = None
                 contrat_id = data['contrat_id']
             else:
