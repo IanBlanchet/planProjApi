@@ -57,6 +57,8 @@ class UserSchema(Schema):
 
     id = fields.Integer()
     username = fields.String()
+    nom = fields.String()
+    prenom = fields.String()
     email = fields.String()
     statut = fields.String()
     service = fields.String()
