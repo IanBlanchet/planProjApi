@@ -17,6 +17,8 @@ class User(Base):
         __tablename__ = 'user'
         id = Column(Integer, primary_key=True)
         username = Column(String(64), index=True, unique=True)
+        nom = Column(String(64))
+        prenom = Column(String(64))
         email = Column(String(120), index=True, unique=True)
         password_hash = Column(String(128))
         statut = Column(String(8), default='attente')#actif, support, attente, archive, admin

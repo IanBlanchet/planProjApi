@@ -38,7 +38,7 @@ api.add_resource(ResetPasswordRequest, '/api/v1/resetPasswordRequest')
 class ResetPassword(MethodResource,Resource):
     def post(self):
         "réinitialiser le password"
-        data = request.get_json(force=True)
+        data = request.get_json(force=True)        
         #user = session.query(User).filter_by(email = data['email']).first()
         
         user = User.verify_reset_password_token(data['token'])

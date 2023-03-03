@@ -17,7 +17,7 @@ class ContratSchema(ma.Schema):
         include_fk = True
         unknown = EXCLUDE
         sqla_session = session
-        fields = ('id', 'no', 'princ', 'desc', 'estimation', 'statut', 'charge_contrat',  'projet_id')
+        fields = ('id', 'no', 'princ', 'desc', 'estimation', 'montant', 'statut', 'charge_contrat',  'projet_id')
         
         
     @post_load
