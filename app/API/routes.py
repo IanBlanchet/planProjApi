@@ -377,7 +377,8 @@ class AllPtiApi(MethodResource, Resource):
                 lesptis[index]['anterieur'] = anterieur 
                 lesptis[index]['nature'] = x.nature
                 lesptis[index]['cat'] = x.cat
-                lesptis[index]['statut'] = x.statut       
+                lesptis[index]['statut'] = x.statut
+                lesptis[index]['depense_courante'] = courante       
             return lesptis
             
         else:
@@ -428,14 +429,14 @@ class EditJalonApi(MethodResource,Resource):
         "edit jalons"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
-            jalon = session.query(Jalon).filter_by(id = jalon_id).first()
+            jalon = session.query(Jalon).filter_by(id = jalon_id).first()            
             if request.args.get('etat'):
                 jalon.etat = "complet"
                 session.commit()
                 return jalon_schema.dump(jalon)
             data = request.get_json(force=True)
             
-            if not jalon:
+            if not jalon:                
                 return ({'message':'there no jalon with this id'}, 400)
             jalon.date = data.get('date')
             jalon.commentaire = data.get('commentaire')
@@ -450,7 +451,7 @@ class EditJalonApi(MethodResource,Resource):
     def delete(self, jalon_id) :
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
-            jalon = session.query(Jalon).filter_by(id = jalon_id).first()
+            jalon = session.query(Jalon).filter_by(id = jalon_id).first()            
             session.delete(jalon)
             session.commit()
             return {'message':f'jalon {jalon_id} successfull deleted'}
