@@ -106,15 +106,15 @@ class Projet(Base):
         def extractFinance(self):
                 reglements = []
                 for reglement in self.financeReglement:
-                        reglements.append({'no':reglement.reglement.numero, 'montant' :reglement.montant})
+                        reglements.append({'id':reglement.reglement.id, 'nom':reglement.reglement.numero, 'montant' :reglement.montant})
 
                 subventions = []
                 for subvention in self.financeSubvention:
-                        subventions.append({'nom':subvention.subvention.nomProg, 'montant':subvention.montant})
+                        subventions.append({'id':subvention.subvention.id, 'nom':subvention.subvention.nomProg+ ' -- ' +subvention.subvention.no_id, 'montant':subvention.montant})
                 
                 fonds = []
                 for fond in self.financeFonds:
-                        fonds.append({'nom':fond.fonds.nom, 'montant':fond.montant})
+                        fonds.append({'id':fond.fonds.id, 'nom':fond.fonds.nom, 'montant':fond.montant})
 
                 return reglements, subventions, fonds
 
