@@ -8,7 +8,7 @@ from sqlalchemy import delete, false, true
 from app.API import bp
 from app.models import Projet, Contrat, User, Jalon, Events, Pti
 from app import app
-from app.config import session, engine, Config
+from app.config import session, engine, Config, sessionmaker
 from flask_restful import Resource, Api, abort
 from datetime import datetime, timedelta
 from flask import Response, redirect, request, url_for
@@ -28,6 +28,14 @@ from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema
 import json
 import msal
 
+
+def extractNextProjectNo():
+    listNoProjet = []
+    projet = session.query(Projet).all()
+    for item in projet:
+        if item.no_projet[:4] == '9000':
+            listNoProjet.append(int(item.no_projet[5:11]))
+    return '9000-'+ str(max(listNoProjet)+1).rjust(5,'0')
 
 
 
@@ -220,6 +228,8 @@ class ProjetApi(MethodResource,Resource):
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
             data = request.get_json(force=True)
+            if not data.get('no_projet') :
+                data['no_projet'] = extractNextProjectNo()
             try:           
                 newProjet = projet_schema.make_projet(data)
                 session.add(newProjet)            
@@ -468,7 +478,9 @@ class UserApi(MethodResource,Resource):
         "GET all user"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
+            
             user = session.query(User).all()
+            
             return users_schema.dump(user) 
         else:            
             return ({'message':'token not valid or expired'}, 400)
