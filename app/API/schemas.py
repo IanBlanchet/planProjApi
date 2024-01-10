@@ -17,7 +17,7 @@ class ContratSchema(ma.Schema):
         include_fk = True
         unknown = EXCLUDE
         sqla_session = session
-        fields = ('id', 'no', 'princ', 'desc', 'estimation', 'statut', 'charge_contrat',  'projet_id')
+        fields = ('id', 'no', 'princ', 'desc', 'estimation', 'montant', 'statut', 'charge_contrat',  'projet_id')
         
         
     @post_load
@@ -37,7 +37,7 @@ class ProjetSchema(ma.Schema):
         load_instance = True
         sqla_session = session
         fields = ('id', 'no_projet', 'desc', 'cat', 'immo', 'reglA', 'reglB', 'statut', 'affectation', 'prev_courante', 'nature', 'rating', 'charge', 'anterieur', 'courante')
-         
+        
 
      @post_load
      def make_projet(self, data, **kwargs):
@@ -57,9 +57,12 @@ class UserSchema(Schema):
 
     id = fields.Integer()
     username = fields.String()
+    nom = fields.String()
+    prenom = fields.String()
     email = fields.String()
     statut = fields.String()
     service = fields.String()
+    password_hash = fields.String()
 
     @post_load
     def make_user(self, data, **kwargs):

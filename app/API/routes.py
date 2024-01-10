@@ -18,6 +18,7 @@ from flask_apispec.extension import FlaskApiSpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec import marshal_with
 import secrets
+from app.API.email import newUserMail
 
 
 import jwt
@@ -75,13 +76,18 @@ class AuthApi(MethodResource,Resource):
         data = request.get_json(force=True)
         
         user = session.query(User).filter_by(username = data['username']).first()
+        
         #msToken = appGraph.acquire_token_by_username_password('blanchia@ville.valleyfield.qc.ca', password=Config.office_pass, scopes=['https://graph.microsoft.com/.default'])
         if user:
             if user.check_password(data['password']):
                 expires = timedelta(days=1)
                 access_token = jwt.encode({"exp":datetime.now() + expires}, Config.SECRET_KEY)
                 #access_token = create_access_token(identity=str(user.id), expires_delta=expires)
-                
+                if user.statut == 'attente':
+                    return ({
+                        "token":None,
+                        'message':'Usager en attente d\'approbation',
+                        'user':None}, 400)
                 return ({
                     'isUser':True,
                     'isLogged' : True,
@@ -130,16 +136,30 @@ class ContratApi(MethodResource,Resource):
                 session.add(newContrat)            
                 session.commit()
             except:
-                return ({'error':'le contrat ne peut être ajouté'})
-                print('error')
+                return ({'error':'le contrat ne peut être ajouté'})                
                          
             return contrat_schema.dump(newContrat)   
         else:
-            return ({'message':'token not valid or expired'}, 400)
-        
+            return ({'message':'token not valid or expired'}, 400)        
         
 
 api.add_resource(ContratApi, '/api/v1/contrat')
+
+
+class ContratByProjectApi(MethodResource,Resource):
+       
+    def get(self, projet_id):
+        "GET all contrat associated to a project"
+        token = request.headers.get('HTTP_AUTHORIZATION')        
+        if isAutorize(token):
+            projet = session.query(Projet).filter_by(id = projet_id).first()
+            
+            #contrat = session.query(Contrat).all()
+            return contrats_schema.dump(projet.contrat)
+        else:
+            return ({'message':'token not valid or expired'}, 400)
+
+api.add_resource(ContratByProjectApi, '/api/v1/contrat/by_project/<int:projet_id>')
 
 
 class EditContratApi(MethodResource,Resource):     
@@ -227,11 +247,15 @@ class EditProjetApi(MethodResource,Resource):
         "edit projet"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
-            data = request.get_json(force=True)            
-            projet = session.query(Projet).filter_by(id= projet_id).first()
+            data = request.get_json(force=True)
+           
+            projet = session.query(Projet).filter_by(id= projet_id).first()            
+                
             for key in data:                
-                setattr(projet, key, data[key])                               
-            session.commit()                
+                setattr(projet, key, data[key])
+            session.commit()
+                                       
+                         
             return projet_schema.dump(projet)   
         else:
             return ({'message':'token not valid or expired'}, 400)
@@ -353,7 +377,8 @@ class AllPtiApi(MethodResource, Resource):
                 lesptis[index]['anterieur'] = anterieur 
                 lesptis[index]['nature'] = x.nature
                 lesptis[index]['cat'] = x.cat
-                lesptis[index]['statut'] = x.statut       
+                lesptis[index]['statut'] = x.statut
+                lesptis[index]['depense_courante'] = courante       
             return lesptis
             
         else:
@@ -377,11 +402,11 @@ class JalonApi(MethodResource,Resource):
         "ADD jalons"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
-            data = request.get_json(force=True)
+            data = request.get_json(force=True)            
             jalon = data['jalon']
             charge_jalon = data['charge_jalon']
             date = data['date']
-            if data['projet_id'] == '':
+            if (data['projet_id'] == None or data['projet_id'] == ''):
                 projet_id = None
                 contrat_id = data['contrat_id']
             else:
@@ -404,14 +429,14 @@ class EditJalonApi(MethodResource,Resource):
         "edit jalons"
         token = request.headers.get('HTTP_AUTHORIZATION')        
         if isAutorize(token):
-            jalon = session.query(Jalon).filter_by(id = jalon_id).first()
+            jalon = session.query(Jalon).filter_by(id = jalon_id).first()            
             if request.args.get('etat'):
                 jalon.etat = "complet"
                 session.commit()
                 return jalon_schema.dump(jalon)
             data = request.get_json(force=True)
             
-            if not jalon:
+            if not jalon:                
                 return ({'message':'there no jalon with this id'}, 400)
             jalon.date = data.get('date')
             jalon.commentaire = data.get('commentaire')
@@ -426,7 +451,7 @@ class EditJalonApi(MethodResource,Resource):
     def delete(self, jalon_id) :
         token = request.headers.get('HTTP_AUTHORIZATION')
         if isAutorize(token):
-            jalon = session.query(Jalon).filter_by(id = jalon_id).first()
+            jalon = session.query(Jalon).filter_by(id = jalon_id).first()            
             session.delete(jalon)
             session.commit()
             return {'message':f'jalon {jalon_id} successfull deleted'}
@@ -450,8 +475,24 @@ class UserApi(MethodResource,Resource):
         
 
     def post(self):
+        "Add new user"
+        data = request.get_json(force=True)
+        
+        userByemail = session.query(User).filter_by(email = data['values']['email']).first()
+        userByUsername = session.query(User).filter_by(username = data['values']['username']).first()
+
+        if userByemail:
+            return ({'user':None, 'message':'Courriel déjà utilisé'},400)
+        elif userByUsername:
+            return ({'user':None, 'message':'Nom d\'usager existant'}, 400)
+
+        newUser = user_schema.make_user(data['values'])
+        newUser.set_password(data['pass'])
+        session.add(newUser)
+        session.commit()
+        newUserMail(newUser)
                   
-        return 
+        return ({'user':user_schema.dump(newUser)},200)
         
 
 api.add_resource(UserApi, '/api/v1/user')
