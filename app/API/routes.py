@@ -306,6 +306,7 @@ class DepenseApi(MethodResource,Resource):
         if isAutorize(token):
             data = request.get_json(force=True)
             is_depense = session.query(Depense).filter_by(projet_id = projet_id, annee=2020).first()
+            print(data)
             if is_depense:
                 is_depense.montant = data['montant']
                 session.commit()
