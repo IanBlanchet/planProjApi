@@ -6,7 +6,7 @@ from threading import Timer
 from flask.wrappers import Request
 from sqlalchemy import delete, false, true
 from app.API import bp
-from app.models import Projet, Contrat, User, Jalon, Events, Pti
+from app.models import Projet, Contrat, User, Jalon, Events, Pti, Depense
 from app import app
 from app.config import session, engine, Config, sessionmaker
 from flask_restful import Resource, Api, abort
@@ -24,7 +24,7 @@ from app.API.email import newUserMail
 import jwt
 #from flask_jwt_extended import create_access_token
 import time
-from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema, EventSchema, PtiSchema
+from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema, EventSchema, PtiSchema, DepenseSchema
 import json
 import msal
 
@@ -69,7 +69,8 @@ event_schema = EventSchema()
 jalon_schema = JalonSchema()
 pti_schema = PtiSchema()
 ptis_schema = PtiSchema(many=True)
-
+depense_schema = DepenseSchema()
+depenses_schema = DepenseSchema(many=True)
 
 class AuthApi(MethodResource,Resource):
     '''
@@ -298,6 +299,21 @@ class DepenseApi(MethodResource,Resource):
             return ({'anterieur':anterieur, 'courante':courante}, 200)
         else:
             return ({'message':'token not valid or expired'}, 400)
+    
+    def post(self, projet_id):
+        "add depense"
+        token = request.headers.get('HTTP_AUTHORIZATION')
+        if isAutorize(token):
+            data = request.get_json(force=True)
+            is_depense = session.query(Depense).filter_by(projet_id = projet_id, annee=data['annee']).first()
+            
+            if is_depense:
+                is_depense.montant = data['montant']
+                session.commit()
+            else:
+                new_depense = depense_schema.make_depense(data)
+                session.add(new_depense)
+                session.commit()
 
 api.add_resource(DepenseApi, '/api/v1/depense/<int:projet_id>')
 

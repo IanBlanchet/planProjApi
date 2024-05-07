@@ -1,6 +1,6 @@
 from app.models import Contrat, Projet, User,\
                         Jalon, Events, Pti, Reglement, Subvention, \
-                        Fonds, Ass_reglement_projet, Ass_fonds_projet, Ass_subvention_projet
+                        Fonds, Ass_reglement_projet, Ass_fonds_projet, Ass_subvention_projet, Depense
 from flask_marshmallow import Marshmallow
 from marshmallow import post_load, INCLUDE, EXCLUDE, fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
@@ -203,3 +203,15 @@ class AssSubventionSchema(ma.Schema):
     @post_load
     def make_ass_subvention_projet(self, data, **kwargs):
         return Ass_subvention_projet(**data)
+    
+class DepenseSchema(ma.Schema):
+    class Meta:
+        model = Depense
+        include_fk = True
+        unknown = EXCLUDE
+        sqla_session = session
+        fields = ('annee', 'montant', 'projet_id')
+    
+    @post_load
+    def make_depense(self, data, **kwargs):
+        return Depense(**data)
