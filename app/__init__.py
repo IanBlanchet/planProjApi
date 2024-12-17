@@ -7,13 +7,14 @@ from flask_cors import CORS
 
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-
+from authlib.integrations.flask_client import OAuth
 
 
 
 
 #l'application FLASK
 app = Flask(__name__)
+oauth = OAuth(app)
 
 app.config.from_object(Config)
 CORS(app)

@@ -2,7 +2,7 @@
 from builtins import print
 from os import access
 from threading import Timer
-
+import base64
 from flask.wrappers import Request
 from sqlalchemy import delete, false, true
 from app.API import bp
@@ -22,6 +22,7 @@ from app.API.email import newUserMail
 
 
 import jwt
+from jwt import PyJWKClient
 #from flask_jwt_extended import create_access_token
 import time
 from app.API.schemas import ContratSchema, UserSchema, ProjetSchema, JalonSchema, EventSchema, PtiSchema, DepenseSchema
@@ -575,6 +576,43 @@ class EditEventApi(MethodResource,Resource):
 
 api.add_resource(EditEventApi, '/api/v1/event/<int:event_id>')
 
+def validate_token(token):
+    jwks_url = "https://login.microsoftonline.com/common/discovery/v2.0/keys"
+    jwks_client = PyJWKClient(jwks_url)
+    signing_key = jwks_client.get_signing_key_from_jwt(token)
+    
+    try:
+        decoded_token = jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=["RS256"],
+            audience="4d08f719-2801-415a-b092-b7ff10b19e92",
+            issuer="https://login.microsoftonline.com/5ed41e40-feb6-4c7c-bd68-d1f98c141543/v2.0"
+        )
+        return decoded_token
+    except jwt.ExpiredSignatureError:
+        print("Le jeton a expiré")
+        return None
+    except jwt.InvalidTokenError:
+        print("Le jeton est invalide")
+        return None
+
+def decode_jwt_header(token):
+    header_segment = token.split('.')[0]
+    padded_header = header_segment + '=' * (4 - len(header_segment) % 4)  # Ajouter le padding si nécessaire
+    decoded_bytes = base64.urlsafe_b64decode(padded_header)
+    header = json.loads(decoded_bytes)
+    return header
+
+class testAuthApi(MethodResource,Resource):
+    def get(self):
+        token = request.headers.get('Authorization')#.split()[1]
+        header = decode_jwt_header(token)
+        print("Algorithme utilisé :", header['alg'])
+        if validate_token(token):
+            return {'test':'pass'}
+
+api.add_resource(testAuthApi, '/api/v1/test')       
 
 app.config.update({
     'APISPEC_SPEC': APISpec(
